@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+:root {
+  /* Kawaii Pastel Palette */
+  --bg-cream: #FFFDE7;
+  --soft-pink: #FFCDD2;
+  --hot-pink: #FF8A80;
+  --mint-green: #B9F6CA;
+  --leaf-green: #69F0AE;
+  --sky-blue: #E1F5FE;
+  --text-choco: #4E342E;
+  /* Softer than black, like chocolate */
+}
+
+body {
+  font-family: var(--font-jua), cursive, sans-serif;
+  background-color: var(--bg-cream);
+  /* Overlay a 85% opacity layer of the cream background color to make the pattern subtle */
+  background-image: linear-gradient(rgba(255, 253, 231, 0.85), rgba(255, 253, 231, 0.85)), url('/images/kawaii-bg.png');
+  background-size: 400px;
+  /* Pattern size */
+  background-repeat: repeat;
+  background-attachment: fixed;
+  color: var(--text-choco);
+  min-height: 100vh;
+}
+
+@layer components {
+
+  /* Kawaii Card Container */
+  .kawaii-card {
+    @apply bg-white rounded-[2rem] border-4 border-[#FFCDD2] transition-all duration-300;
+    box-shadow: 0 8px 0px 0px #FF8A80, 0 8px 20px rgba(255, 138, 128, 0.4);
+    /* Soft glow inside */
+    background: linear-gradient(180deg, #FFFFFF 0%, #FFF5F5 100%);
+  }
+
+  .kawaii-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 0px 0px #FF8A80, 0 12px 25px rgba(255, 138, 128, 0.5);
+  }
+
+  /* Glossy Button */
+  .kawaii-button {
+    @apply rounded-full transition-all duration-300 font-bold relative overflow-hidden;
+    /* Base will be handled in component, but shared styles here */
+    box-shadow: 0 6px 0px 0px rgba(0, 0, 0, 0.15);
+  }
+
+  .kawaii-button:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0px 0px rgba(0, 0, 0, 0.15);
+  }
+
+  .kawaii-input {
+    @apply bg-white border-4 border-[#E1F5FE] rounded-2xl text-[#4E342E] px-4 py-3 focus:outline-none focus:border-[#FFCDD2] focus:ring-4 focus:ring-[#FFCDD2]/30 transition-all shadow-inner text-lg;
+  }
+}
+
+/* Bouncy Float */
+@keyframes bounce-float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-bounce-float {
+  animation: bounce-float 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+
+/* Custom Scrollbar for Parchment */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(93, 64, 55, 0.05);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(93, 64, 55, 0.3);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(93, 64, 55, 0.5);
+}
