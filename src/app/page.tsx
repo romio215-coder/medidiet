@@ -1,164 +1,62 @@
 "use client";
 
 import { useUserStore } from '@/store/userStore';
-import { getRecommendedMeals } from '@/lib/nutritionAlgorithm';
-import foodData from '@/data/foodData.json';
-import { FoodItem } from '@/types';
-import { useState, useMemo, useEffect } from 'react';
+import { LargeButton } from '@/components/ui/LargeButton';
+import Link from 'next/link';
+import Image from 'next/image';
 import { translations } from '@/data/locales';
-import { adaptMfdsItems } from '@/data/apiAdapter';
 
-export default function MealRecommendations() {
-  const { profile, language } = useUserStore();
-  const t = translations[language].meals;
+export default function Home() {
+  const { language } = useUserStore();
+  const t = translations[language].landing;
   const common = translations[language].common;
 
-  // Search State
-  const [searchQuery, setSearchQuery] = useState('');
-  const [apiResults, setApiResults] = useState<FoodItem[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  // Fetch API on search (Note: This will not work on static GitHub Pages)
-  useEffect(() => {
-    const fetchApi = async () => {
-      if (searchQuery.length < 2) {
-        setApiResults([]);
-        return;
-      }
-      setLoading(true);
-      try {
-        // In static export, this route doesn't exist.
-        // We keep the code for local dev structure, but it will 404 on GH Pages.
-        const res = await fetch(`/api/food?q=${encodeURIComponent(searchQuery)}`);
-        if (!res.ok) throw new Error("API not available in static mode");
-        const data = await res.json();
-        if (data.items) {
-          const adapted = adaptMfdsItems(data.items);
-          setApiResults(adapted);
-        }
-      } catch (err) {
-        console.warn("Search API skipped (Static Mode or Error)", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    // Debounce
-    const timeout = setTimeout(fetchApi, 500);
-    return () => clearTimeout(timeout);
-  }, [searchQuery]);
-
-  // Merge Local + API
-  const allFoods = useMemo(() => {
-    // If searching, prioritize API results + partial local matches
-    if (searchQuery) {
-      const localMatches = (foodData as unknown as FoodItem[]).filter(f =>
-        f.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (f.nameKo && f.nameKo.includes(searchQuery))
-      );
-      return [...localMatches, ...apiResults];
-    }
-    // Default: just local
-    return foodData as unknown as FoodItem[];
-  }, [searchQuery, apiResults]);
-
-  // Apply Algorithm
-  const recommendations = useMemo(() => {
-    return getRecommendedMeals(profile, allFoods);
-  }, [profile, allFoods]);
-
-  // Simple Category Filter
-  const [filter, setFilter] = useState<'ALL' | 'SAFE' | 'CAUTION'>('ALL');
-
-  const displayedMeals = recommendations.filter(rec => {
-    if (filter === 'ALL') return true;
-    return rec.status === filter;
-  });
-
   return (
-    <div className="flex flex-col h-full w-full items-center py-6 relative">
-
-      {/* Main Kawaii Card */}
-      <div className="kawaii-card w-full min-h-[85vh] flex flex-col space-y-4 relative p-6">
-        <h1 className="text-3xl font-black text-[#FF8A80] text-center mb-2">🥗 {t.title}</h1>
-
-        {/* Search */}
-        <div className="relative">
-          <input
-            type="text"
-            placeholder={common.search}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full kawaii-input py-3 px-4 text-lg bg-[#FAFAFA] pl-10"
+    <div className="flex flex-col h-full items-center justify-center py-6 text-center">
+      {/* Kawaii Container */}
+      <div className="kawaii-card w-full max-w-sm p-8 flex flex-col items-center space-y-8 animate-bounce-float">
+        {/* Logo Area */}
+        <div className="relative w-48 h-48 drop-shadow-xl">
+          <Image
+            src="/medidiet/images/kawaii-logo.png"
+            alt="MediDiet Logo"
+            fill
+            className="object-contain"
+            priority
           />
-          <div className="absolute right-4 top-4 text-[#BDBDBD]">🍳</div>
         </div>
 
-        {/* Filter Tabs */}
-        <div className="flex space-x-2">
-          {['ALL', 'SAFE', 'CAUTION'].map((ft) => (
-            <button
-              key={ft}
-              onClick={() => setFilter(ft as 'ALL' | 'SAFE' | 'CAUTION')}
-              className={`flex-1 py-2 rounded-full font-bold transition-all border-2
-                  ${filter === ft
-                  ? 'bg-[#FF8A80] text-white border-[#FF8A80] shadow-md transform scale-105'
-                  : 'bg-white text-[#90A4AE] border-[#CFD8DC] hover:bg-[#ECEFF1]'}
-                `}
-            >
-              {ft === 'ALL' ? t.filterAll : ft === 'SAFE' ? '🥰 ' + common.safe : '😯 ' + common.caution}
-            </button>
-          ))}
+        {/* Text Area */}
+        <div className="space-y-4">
+          <h1 className="text-4xl font-black text-[#FF8A80] drop-shadow-sm">
+            {t.title}
         </div>
+        <p className="text-[#8D6E63] font-bold text-lg leading-relaxed whitespace-pre-wrap">
+          {t.subtitle}
+        </p>
+      </div>
 
-        {/* List */}
-        <div className="flex-1 space-y-4 overflow-y-auto pb-4 custom-scrollbar px-1">
-          {displayedMeals.map((item) => (
-            <div key={item.food.id} className={`p-4 rounded-[1.5rem] flex flex-col space-y-2 border-2 transition-all hover:scale-[1.02] duration-200 shadow-sm
-                ${item.status === 'SAFE' ? 'bg-[#F1F8E9] border-[#C5E1A5]' : ''}
-                ${item.status === 'CAUTION' ? 'bg-[#FFF8E1] border-[#FFE082]' : ''}
-                ${item.status === 'DANGER' ? 'bg-[#FFEBEE] border-[#FFCDD2]' : ''}
-             `}>
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="text-xl font-bold text-[#4E342E]">
-                    {language === 'KO' ? (item.food.nameKo || item.food.name) : item.food.name}
-                  </h3>
-                  <p className="text-[#90A4AE] text-sm font-bold">
-                    {language === 'KO' ? (item.food.categoryKo || item.food.category) : item.food.category} • {item.food.calories} kcal
-                  </p>
-                </div>
-                <div className="text-2xl">
-                  {item.status === 'SAFE' ? '🥰' : item.status === 'CAUTION' ? '😯' : '😱'}
-                </div>
-              </div>
+      {/* Features Highlight */}
+      <ul className="text-left w-full space-y-2 bg-[#FFF9C4]/50 p-4 rounded-3xl border-2 border-[#FFF59D] border-dashed">
+        {t.whyList.map((item, i) => (
+          <li key={i} className="flex items-center text-[#5D4037] font-bold text-sm">
+            <span className="mr-2 text-pink-400">💖</span> {item}
+          </li>
+        ))}
+      </ul>
 
-              {/* Nutrition details */}
-              <div className="text-sm font-bold text-[#795548] grid grid-cols-2 gap-x-4 gap-y-1 mt-1 bg-white/50 p-2 rounded-xl">
-                <span>{t.sodium}: {item.food.sodium}mg</span>
-                <span>{t.sugar}: {item.food.sugar}g</span>
-                {profile.diseases.includes('CKD') && (
-                  <span className="text-[#E64A19]">{t.potassium}: {item.food.potassium}mg</span>
-                )}
-              </div>
-
-              {/* Status Message */}
-              {item.reasons.length > 0 && (
-                <p className="text-sm font-bold text-[#D32F2F] bg-[#FFCDD2] p-2 rounded-lg text-center">
-                  ⚠️ {item.reasons.join(', ')}
-                </p>
-              )}
-            </div>
-          ))}
-
-          {displayedMeals.length === 0 && (
-            <div className="text-center py-10 opacity-50">
-              <span className="text-6xl">🥕</span>
-              <p className="text-[#8D6E63] font-bold text-xl mt-4">{loading ? common.loading : t.noResults}</p>
-            </div>
-          )}
-        </div>
+      {/* Start Button */}
+      <div className="w-full pt-4">
+        <Link href="/meals/">
+          <LargeButton variant="primary" className="text-xl py-6 shadow-lg">
+            {common.start}
+          </LargeButton>
+        </Link>
+        <p className="text-[0.7rem] text-[#90A4AE] mt-4 font-bold opacity-70">
+          {t.freeNotice}
+        </p>
       </div>
     </div>
-  );
+        </div >
+    );
 }
