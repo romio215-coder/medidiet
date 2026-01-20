@@ -16,7 +16,7 @@ body {
   font-family: var(--font-jua), cursive, sans-serif;
   background-color: var(--bg-cream);
   /* Overlay a 85% opacity layer of the cream background color to make the pattern subtle */
-  background-image: linear-gradient(rgba(255, 253, 231, 0.85), rgba(255, 253, 231, 0.85)), url('/images/kawaii-bg.png');
+  background-image: linear-gradient(rgba(255, 253, 231, 0.85), rgba(255, 253, 231, 0.85)), url('/medidiet/images/kawaii-bg.png');
   background-size: 400px;
   /* Pattern size */
   background-repeat: repeat;
