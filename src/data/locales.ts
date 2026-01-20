@@ -41,12 +41,21 @@ export const translations = {
                 DYS: "이상지질혈증 (Dyslipidemia)",
                 CKD: "만성신장질환 (CKD)",
                 OBESITY: "비만 (Obesity)",
-                COLORECTAL: "대장암 예방 (Colorectal Health)"
+                COLORECTAL: "암 예방 (Cancer Prevention)"
             },
             warnings: {
                 CKD: "칼륨과 단백질 섭취를 자동으로 제한합니다.",
                 OBESITY: "체중 감량을 위해 칼로리와 지방 섭취를 제한합니다.",
-                COLORECTAL: "장 건강을 위해 식이섬유 섭취를 권장합니다."
+                COLORECTAL: "항암 건강을 위해 가공식품을 줄이고 자연식을 권장합니다."
+            },
+            healthReport: {
+                title: "2024 건강 리포트",
+                facts: [
+                    { title: "비만 경보", text: "비만 유병률이 10년 새 2배 급증했습니다 (10.3% → 20.9%). 체중 관리가 시급합니다.", type: "danger" },
+                    { title: "조용한 살인자", text: "고혈압 환자의 56%는 혈압 관리가 제대로 되지 않고 있습니다.", type: "caution" },
+                    { title: "암 발생 변화", text: "서구화된 식습관으로 대장암 등 서구형 암이 증가하고 있습니다. 채소 섭취를 늘리세요!", type: "info" },
+                    { title: "예방이 최선", text: "만성질환이 전체 진료비의 80%를 차지합니다. 치료보다 예방이 중요합니다.", type: "success" }
+                ]
             },
             alertInfo: "이름과 나이를 입력해주세요."
         },
@@ -117,12 +126,21 @@ export const translations = {
                 DYS: "Dyslipidemia",
                 CKD: "Chronic Kidney Disease",
                 OBESITY: "Obesity (BMI > 25)",
-                COLORECTAL: "Colorectal Cancer Prevention"
+                COLORECTAL: "Cancer Prevention"
             },
             warnings: {
                 CKD: "We will limit Potassium & Protein",
                 OBESITY: "We will restrict calories & fat for weight loss.",
-                COLORECTAL: "We recommend high-fiber foods."
+                COLORECTAL: "We recommend whole foods and less processed items."
+            },
+            healthReport: {
+                title: "2024 Health Report",
+                facts: [
+                    { title: "Obesity Alert", text: "Obesity rates doubled in 10 years (10.3% → 20.9%). Managing weight is key.", type: "danger" },
+                    { title: "Silent Killer", text: "56% of Hypertension patients don't have their BP under control.", type: "caution" },
+                    { title: "Cancer Trends", text: "Westernized diets are increasing cancer risks. Eat more fiber!", type: "info" },
+                    { title: "Prevention First", text: "Chronic diseases account for 80% of medical costs. Prevention is better than cure.", type: "success" }
+                ]
             },
             alertInfo: "Please enter Name and Age"
         },
