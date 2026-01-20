@@ -5,9 +5,7 @@ import { getRecommendedMeals } from '@/lib/nutritionAlgorithm';
 import foodData from '@/data/foodData.json';
 import { FoodItem } from '@/types';
 import { useState, useMemo, useEffect } from 'react';
-import Link from 'next/link';
 import { translations } from '@/data/locales';
-import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { adaptMfdsItems } from '@/data/apiAdapter';
 
 export default function MealRecommendations() {
@@ -101,7 +99,7 @@ export default function MealRecommendations() {
           {['ALL', 'SAFE', 'CAUTION'].map((ft) => (
             <button
               key={ft}
-              onClick={() => setFilter(ft as any)}
+              onClick={() => setFilter(ft as 'ALL' | 'SAFE' | 'CAUTION')}
               className={`flex-1 py-2 rounded-full font-bold transition-all border-2
                   ${filter === ft
                   ? 'bg-[#FF8A80] text-white border-[#FF8A80] shadow-md transform scale-105'
