@@ -7,6 +7,7 @@ import { FoodItem } from '@/types';
 import { useState, useMemo, useEffect } from 'react';
 import { translations } from '@/data/locales';
 import { adaptMfdsItems } from '@/data/apiAdapter';
+import { BackButton } from '@/components/ui/BackButton';
 
 export default function MealRecommendations() {
   const { profile, language } = useUserStore();
@@ -77,6 +78,7 @@ export default function MealRecommendations() {
 
   return (
     <div className="flex flex-col h-full w-full items-center py-6 relative">
+      <BackButton />
 
       {/* Main Kawaii Card */}
       <div className="kawaii-card w-full min-h-[85vh] flex flex-col space-y-4 relative p-6">

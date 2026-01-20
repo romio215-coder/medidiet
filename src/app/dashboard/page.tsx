@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { translations } from '@/data/locales';
+import { BackButton } from '@/components/ui/BackButton';
 
 export default function Dashboard() {
     const { profile, isConfigured, language } = useUserStore();
@@ -30,6 +31,7 @@ export default function Dashboard() {
 
     return (
         <div className="flex flex-col h-full w-full p-6 space-y-8 relative">
+            <BackButton />
 
             <div className="flex flex-col h-full w-full items-center py-6 relative">
 

@@ -6,6 +6,7 @@ import { useUserStore } from '@/store/userStore';
 import { LargeButton } from '@/components/ui/LargeButton';
 import { DiseaseType } from '@/types';
 import { translations } from '@/data/locales';
+import { BackButton } from '@/components/ui/BackButton';
 
 export default function Onboarding() {
     const router = useRouter();
@@ -32,6 +33,14 @@ export default function Onboarding() {
         }
     };
 
+    const handleBack = () => {
+        if (step > 1) {
+            setStep(step - 1);
+        } else {
+            router.push('/');
+        }
+    };
+
     const handleNext = () => {
         if (step === 1) {
             if (!formData.name || !formData.age) return alert(t.alertInfo);
@@ -49,6 +58,7 @@ export default function Onboarding() {
 
     return (
         <div className="flex flex-col h-full w-full items-center py-6 relative">
+            <BackButton onClick={handleBack} />
             {/* Main Kawaii Card */}
             <div className="kawaii-card w-full flex-1 flex flex-col relative p-6">
                 {/* Progress Bar (Cute Pink) */}
