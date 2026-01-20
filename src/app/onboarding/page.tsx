@@ -6,7 +6,6 @@ import { useUserStore } from '@/store/userStore';
 import { LargeButton } from '@/components/ui/LargeButton';
 import { DiseaseType } from '@/types';
 import { translations } from '@/data/locales';
-import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 
 export default function Onboarding() {
     const router = useRouter();

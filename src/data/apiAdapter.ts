@@ -19,8 +19,8 @@ interface MfdsFoodItem {
     // For safety, we will parse what is available.
 }
 
-export function adaptMfdsItems(rows: any[]): FoodItem[] {
-    return rows.map((row, index) => {
+export function adaptMfdsItems(rows: MfdsFoodItem[]): FoodItem[] {
+    return rows.map((row) => {
         // Parse helper
         const p = (val: string) => {
             const num = parseFloat(val);

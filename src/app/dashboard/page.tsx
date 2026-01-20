@@ -6,18 +6,21 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { translations } from '@/data/locales';
-import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 
 export default function Dashboard() {
     const { profile, isConfigured, language } = useUserStore();
     const router = useRouter();
     const [mounted, setMounted] = useState(false);
     const t = translations[language].dashboard;
-    const common = translations[language].common;
+    // const common = translations[language].common;
     const mealT = translations[language].meals;
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true);
+    }, []);
+
+    useEffect(() => {
         if (!isConfigured) {
             router.push('/onboarding');
         }
