@@ -65,16 +65,32 @@ export default function Dashboard() {
 
                     {/* Health Gauges */}
                     <div className="space-y-4">
-                        <h2 className="text-xl font-bold text-[#4E342E] flex items-center gap-2">
-                            📊 {t.goalsTitle}
-                        </h2>
+                        <div className="flex justify-between items-end">
+                            <h2 className="text-xl font-bold text-[#4E342E] flex items-center gap-2">
+                                📊 {t.goalsTitle}
+                            </h2>
+                            <span className="text-xs text-[#8D6E63] opacity-75">{t.exampleValue}</span>
+                        </div>
+
                         <div className="space-y-5 bg-[#FFF9C4]/30 p-4 rounded-[2rem] border-2 border-[#FFF59D]">
-                            <Gauge label={mealT.sodium} current={800} max={2000} unit="mg"
+                            {/* Logic: HTN/CKD gets stricter sodium (1500mg) vs Normal (2000mg) */}
+                            <Gauge
+                                label={mealT.sodium}
+                                current={800}
+                                max={profile.diseases.includes('HTN') || profile.diseases.includes('CKD') ? 1500 : 2000}
+                                unit="mg"
                                 warning={profile.diseases.includes('HTN') || profile.diseases.includes('CKD')}
                             />
-                            <Gauge label={mealT.sugar} current={15} max={50} unit="g"
-                                warning={profile.diseases.includes('DM')}
+
+                            {/* Logic: DM/Obesity gets stricter sugar (25g) vs Normal (50g) */}
+                            <Gauge
+                                label={mealT.sugar}
+                                current={15}
+                                max={profile.diseases.includes('DM') || profile.diseases.includes('OBESITY') ? 25 : 50}
+                                unit="g"
+                                warning={profile.diseases.includes('DM') || profile.diseases.includes('OBESITY')}
                             />
+
                             {profile.diseases.includes('CKD') && (
                                 <Gauge label={mealT.potassium} current={1200} max={2000} unit="mg" warning />
                             )}

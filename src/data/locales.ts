@@ -66,7 +66,9 @@ export const translations = {
             recommendedDesc: "현재 건강 상태에 딱 맞는 안전한 식단을 찾았습니다.",
             viewPlan: "식단 보러가기",
             healthy: "건강함",
-            sir: " 님"
+            sir: " 님",
+            exampleValue: "(현재 섭취량 예시)",
+            limit: "제한 목표: "
         },
         meals: {
             title: "식단 가이드",
@@ -151,7 +153,9 @@ export const translations = {
             recommendedDesc: "Based on your condition, we found safe meals for you.",
             viewPlan: "View Meal Plan",
             healthy: "Healthy",
-            sir: ""
+            sir: "",
+            exampleValue: "(Current Intake Example)",
+            limit: "Limit: "
         },
         meals: {
             title: "Meal Plan",
