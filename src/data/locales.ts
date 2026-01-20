@@ -39,10 +39,14 @@ export const translations = {
                 DM: "당뇨병 (Diabetes)",
                 HTN: "고혈압 (Hypertension)",
                 DYS: "이상지질혈증 (Dyslipidemia)",
-                CKD: "만성신장질환 (CKD)"
+                CKD: "만성신장질환 (CKD)",
+                OBESITY: "비만 (Obesity)",
+                COLORECTAL: "대장암 예방 (Colorectal Health)"
             },
             warnings: {
-                CKD: "칼륨과 단백질 섭취를 자동으로 제한합니다."
+                CKD: "칼륨과 단백질 섭취를 자동으로 제한합니다.",
+                OBESITY: "체중 감량을 위해 칼로리와 지방 섭취를 제한합니다.",
+                COLORECTAL: "장 건강을 위해 식이섬유 섭취를 권장합니다."
             },
             alertInfo: "이름과 나이를 입력해주세요."
         },
@@ -111,10 +115,14 @@ export const translations = {
                 DM: "Diabetes (DM)",
                 HTN: "Hypertension (High BP)",
                 DYS: "Dyslipidemia",
-                CKD: "Chronic Kidney Disease"
+                CKD: "Chronic Kidney Disease",
+                OBESITY: "Obesity (BMI > 25)",
+                COLORECTAL: "Colorectal Cancer Prevention"
             },
             warnings: {
-                CKD: "We will limit Potassium & Protein"
+                CKD: "We will limit Potassium & Protein",
+                OBESITY: "We will restrict calories & fat for weight loss.",
+                COLORECTAL: "We recommend high-fiber foods."
             },
             alertInfo: "Please enter Name and Age"
         },

@@ -167,6 +167,18 @@ export default function Onboarding() {
                                     onClick={() => toggleDisease('CKD')}
                                     warning={t.warnings.CKD}
                                 />
+                                <DiseaseCard
+                                    label={t.diseases.OBESITY}
+                                    selected={selectedDiseases.includes('OBESITY')}
+                                    onClick={() => toggleDisease('OBESITY')}
+                                    warning={t.warnings.OBESITY}
+                                />
+                                <DiseaseCard
+                                    label={t.diseases.COLORECTAL}
+                                    selected={selectedDiseases.includes('COLORECTAL')}
+                                    onClick={() => toggleDisease('COLORECTAL')}
+                                    warning={t.warnings.COLORECTAL}
+                                />
                             </div>
                         </div>
                     )}

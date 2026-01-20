@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { translations } from '@/data/locales';
 import { BackButton } from '@/components/ui/BackButton';
+import { HealthReportWidget } from '@/components/ui/HealthReportWidget';
 
 export default function Dashboard() {
     const { profile, isConfigured, language } = useUserStore();
@@ -54,6 +55,11 @@ export default function Dashboard() {
                                     {t.healthy}
                                 </span>
                             )}
+                        </div>
+
+                        {/* 2024 Health Insights */}
+                        <div className="w-full mt-4">
+                            <HealthReportWidget />
                         </div>
                     </div>
 

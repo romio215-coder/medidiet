@@ -1,4 +1,4 @@
-export type DiseaseType = 'DM' | 'HTN' | 'DYS' | 'CKD';
+export type DiseaseType = 'DM' | 'HTN' | 'DYS' | 'CKD' | 'OBESITY' | 'COLORECTAL';
 
 export interface UserProfile {
     name: string;

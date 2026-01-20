@@ -72,6 +72,40 @@ export function getRecommendedMeals(user: UserProfile, foods: FoodItem[]): MealR
             }
         }
 
+        // --- Obesity Logic (Based on 2024 Report) ---
+        if (user.diseases.includes('OBESITY')) {
+            // Calorie Check (> 700kcal is heavy for one meal)
+            if (food.calories > 700) {
+                status = (status === 'SAFE') ? 'CAUTION' : status;
+                reasons.push('High Calories');
+            }
+            // Fat Check (> 25g)
+            if (food.fat > 25) {
+                if (status !== 'DANGER') status = 'CAUTION';
+                reasons.push('High Fat (Weight Management)');
+            }
+            // Sugar Check (Strict)
+            if (food.sugar > 15) {
+                reasons.push('High Sugar');
+                if (status === 'SAFE') status = 'CAUTION';
+            }
+        }
+
+        // --- Colorectal Cancer Prevention (Based on 2024 Report) ---
+        if (user.diseases.includes('COLORECTAL')) {
+            // "Westernized Diet" (High Fat) is a risk factor
+            if (food.fat > 20) {
+                reasons.push('High Fat (Colorectal Risk)');
+                if (status === 'SAFE') status = 'CAUTION';
+            }
+            // Ideally prioritize Fiber, but we lack data. 
+            // We flag processed/heavy items (High Sodium + High Fat often correlates)
+            if (food.sodium > 1000 && food.fat > 20) {
+                status = 'CAUTION';
+                reasons.push('Processed/Heavy Meal (Limit for Gut Health)');
+            }
+        }
+
         // Default Healthy Checks (even if no disease selected, strict high sodium/sugar is bad)
         if (user.diseases.length === 0) {
             if (food.sodium > 1500) {
