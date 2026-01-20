@@ -49,7 +49,7 @@ export const translations = {
                 COLORECTAL: "항암 건강을 위해 가공식품을 줄이고 자연식을 권장합니다."
             },
             healthReport: {
-                title: "2024 건강 리포트",
+                title: "최신 건강 리포트",
                 facts: [
                     { title: "비만 경보", text: "비만 유병률이 10년 새 2배 급증했습니다 (10.3% → 20.9%). 체중 관리가 시급합니다.", type: "danger" },
                     { title: "조용한 살인자", text: "고혈압 환자의 56%는 혈압 관리가 제대로 되지 않고 있습니다.", type: "caution" },
@@ -134,7 +134,7 @@ export const translations = {
                 COLORECTAL: "We recommend whole foods and less processed items."
             },
             healthReport: {
-                title: "2024 Health Report",
+                title: "Latest Health Report",
                 facts: [
                     { title: "Obesity Alert", text: "Obesity rates doubled in 10 years (10.3% → 20.9%). Managing weight is key.", type: "danger" },
                     { title: "Silent Killer", text: "56% of Hypertension patients don't have their BP under control.", type: "caution" },
