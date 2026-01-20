@@ -22,7 +22,7 @@ export default function Home() {
 
     // We can use next/navigation
     const timer = setTimeout(() => {
-      window.location.href = '/medidiet/meals';
+      window.location.href = '/medidiet/meals/';
     }, 100);
     return () => clearTimeout(timer);
   }, []);

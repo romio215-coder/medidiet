@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   output: 'export',
   basePath: '/medidiet',
+  trailingSlash: true,
   images: {
     unoptimized: true,
   },
