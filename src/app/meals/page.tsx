@@ -28,13 +28,17 @@ export default function MealRecommendations() {
       }
       setLoading(true);
       try {
-        // In static export, this route doesn't exist.
-        // We keep the code for local dev structure, but it will 404 on GH Pages.
-        const res = await fetch(`/api/food?q=${encodeURIComponent(searchQuery)}`);
-        if (!res.ok) throw new Error("API not available in static mode");
-        const data = await res.json();
-        if (data.items) {
-          const adapted = adaptMfdsItems(data.items);
+        const key = '40b1066f060f492fadfd';
+        const url = `https://openapi.foodsafetykorea.go.kr/api/${key}/I2790/json/1/10/DESC_KOR=${encodeURIComponent(searchQuery)}`;
+
+        console.log("Fetching MFDS API (Client-side):", searchQuery);
+
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("API not available or blocked by CORS");
+        const rawData = await res.json();
+
+        if (rawData.I2790 && rawData.I2790.row) {
+          const adapted = adaptMfdsItems(rawData.I2790.row);
           setApiResults(adapted);
         }
       } catch (err) {

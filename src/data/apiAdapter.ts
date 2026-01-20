@@ -20,7 +20,7 @@ interface MfdsFoodItem {
 }
 
 export function adaptMfdsItems(rows: MfdsFoodItem[]): FoodItem[] {
-    return rows.map((row) => {
+    return rows.map((row, _index) => {
         // Parse helper
         const p = (val: string) => {
             const num = parseFloat(val);
