@@ -20,16 +20,23 @@ export async function GET(request: Request) {
     // Fetching first 20 results
     const start = 1;
     const end = 20;
-    const url = `http://openapi.foodsafetykorea.go.kr/api/${API_KEY}/${SERVICE_ID}/${TYPE}/${start}/${end}/DESC_KOR=${encodeURIComponent(query)}`;
+    // Use HTTPS
+    const url = `https://openapi.foodsafetykorea.go.kr/api/${API_KEY}/${SERVICE_ID}/${TYPE}/${start}/${end}/DESC_KOR=${encodeURIComponent(query)}`;
 
     try {
         const res = await fetch(url);
-        const data = await res.json();
+        const text = await res.text();
 
-        if (data[SERVICE_ID] && data[SERVICE_ID].row) {
-            return NextResponse.json({ items: data[SERVICE_ID].row });
-        } else {
-            return NextResponse.json({ items: [] });
+        try {
+            const data = JSON.parse(text);
+            if (data[SERVICE_ID] && data[SERVICE_ID].row) {
+                return NextResponse.json({ items: data[SERVICE_ID].row });
+            } else {
+                return NextResponse.json({ items: [] });
+            }
+        } catch (e) {
+            console.error("MFDS JSON Parse Error. Raw response:", text);
+            return NextResponse.json({ error: 'Invalid JSON response from MFDS' }, { status: 500 });
         }
 
     } catch (error) {
