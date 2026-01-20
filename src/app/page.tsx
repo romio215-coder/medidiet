@@ -47,7 +47,7 @@ export default function Home() {
 
         {/* Start Button */}
         <div className="w-full pt-4">
-          <Link href="/meals/">
+          <Link href="/onboarding/">
             <LargeButton variant="primary" className="text-xl py-6 shadow-lg">
               {common.start}
             </LargeButton>
