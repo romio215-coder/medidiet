@@ -143,6 +143,9 @@ export default function MealRecommendations() {
               <div className="text-sm font-bold text-[#795548] grid grid-cols-2 gap-x-4 gap-y-1 mt-1 bg-white/50 p-2 rounded-xl">
                 <span>{t.sodium}: {item.food.sodium}mg</span>
                 <span>{t.sugar}: {item.food.sugar}g</span>
+                <span>{t.carbs}: {item.food.carbs}g</span>
+                <span>{t.protein}: {item.food.protein}g</span>
+                <span>{t.fat}: {item.food.fat}g</span>
                 {profile.diseases.includes('CKD') && (
                   <span className="text-[#E64A19]">{t.potassium}: {item.food.potassium}mg</span>
                 )}

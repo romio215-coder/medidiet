@@ -63,8 +63,10 @@ export const translations = {
             filterCaution: "주의 ⚠️",
             sodium: "나트륨",
             sugar: "당류",
-            potassium: "칼륨",
+            carbs: "탄수화물",
             protein: "단백질",
+            fat: "지방",
+            potassium: "칼륨",
             noResults: "해당하는 음식이 없습니다.",
             reasons: "이유"
         }
@@ -133,8 +135,10 @@ export const translations = {
             filterCaution: "Caution ⚠️",
             sodium: "Sodium",
             sugar: "Sugar",
-            potassium: "K+",
+            carbs: "Carbs",
             protein: "Protein",
+            fat: "Fat",
+            potassium: "K+",
             noResults: "No foods found.",
             reasons: "Reason"
         }
