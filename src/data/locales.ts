@@ -83,7 +83,21 @@ export const translations = {
             fat: "지방",
             potassium: "칼륨",
             noResults: "해당하는 음식이 없습니다.",
-            reasons: "이유"
+            reasons: "이유",
+            warningCodes: {
+                HIGH_POTASSIUM: "고칼륨 (신장 위험)",
+                MODERATE_POTASSIUM: "중등도 칼륨",
+                HIGH_PROTEIN: "고단백 (신장 질환 주의)",
+                HIGH_SODIUM_KIDNEY: "고나트륨 (신장 부담)",
+                HIGH_SUGAR: "고당분",
+                HIGH_GI: "높은 혈당지수 (혈당 급상승 위험)",
+                HIGH_SODIUM_BP: "고나트륨 (혈압 위험)",
+                VERY_HIGH_SODIUM: "초고나트륨",
+                HIGH_CALORIES: "고칼로리",
+                HIGH_FAT: "고지방 (체중 관리 필요)",
+                HIGH_FAT_COLORECTAL: "고지방 (암 위험)",
+                PROCESSED: "가공식품/과식 (장 건강 주의)"
+            }
         }
     },
     EN: {
@@ -170,7 +184,21 @@ export const translations = {
             fat: "Fat",
             potassium: "K+",
             noResults: "No foods found.",
-            reasons: "Reason"
+            reasons: "Reason",
+            warningCodes: {
+                HIGH_POTASSIUM: "High Potassium (Risk for Kidneys)",
+                MODERATE_POTASSIUM: "Moderate Potassium",
+                HIGH_PROTEIN: "High Protein (Limit for CKD)",
+                HIGH_SODIUM_KIDNEY: "High Sodium (Kidney Strain)",
+                HIGH_SUGAR: "High Sugar",
+                HIGH_GI: "High GI (Blood Sugar Spike Risk)",
+                HIGH_SODIUM_BP: "High Sodium (BP Risk)",
+                VERY_HIGH_SODIUM: "Very High Sodium",
+                HIGH_CALORIES: "High Calories",
+                HIGH_FAT: "High Fat (Weight Management)",
+                HIGH_FAT_COLORECTAL: "High Fat (Colorectal Risk)",
+                PROCESSED: "Processed/Heavy Meal (Limit for Gut Health)"
+            }
         }
     }
 };

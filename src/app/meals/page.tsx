@@ -154,7 +154,12 @@ export default function MealRecommendations() {
               {/* Status Message */}
               {item.reasons.length > 0 && (
                 <p className="text-sm font-bold text-[#D32F2F] bg-[#FFCDD2] p-2 rounded-lg text-center">
-                  ⚠️ {item.reasons.join(', ')}
+                  ⚠️ {item.reasons.map(code => (
+                    // Only try to translate if it's a known code, otherwise show as is (fallback)
+                    t.warningCodes && t.warningCodes[code as keyof typeof t.warningCodes]
+                      ? t.warningCodes[code as keyof typeof t.warningCodes]
+                      : code
+                  )).join(', ')}
                 </p>
               )}
             </div>

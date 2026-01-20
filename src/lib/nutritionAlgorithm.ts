@@ -15,26 +15,26 @@ export function getRecommendedMeals(user: UserProfile, foods: FoodItem[]): MealR
             // High potassium foods (> 400mg) are dangerous for CKD
             if (food.potassium > 400) {
                 status = 'DANGER';
-                reasons.push('High Potassium (Risk for Kidneys)');
+                reasons.push('HIGH_POTASSIUM');
             } else if (food.potassium > 200) {
                 // If not already danger, mark caution
                 if (status === 'SAFE' || status === 'CAUTION') {
                     status = 'CAUTION';
                 }
-                reasons.push('Moderate Potassium');
+                reasons.push('MODERATE_POTASSIUM');
             }
 
             // Protein check (0.6g/kg is strict, but for single item, warn if very high protein density)
             // Heuristic: > 30g protein in one item might be too much for one meal for CKD
             if (food.protein > 35) {
                 if (status !== 'DANGER') status = 'CAUTION'; // Not danger, but caution to limit portion
-                reasons.push('High Protein (Limit portion for CKD)');
+                reasons.push('HIGH_PROTEIN');
             }
 
             // Sodium for CKD
             if (food.sodium > 800) {
                 status = 'DANGER';
-                reasons.push('High Sodium (Kidney Strain)');
+                reasons.push('HIGH_SODIUM_KIDNEY');
             }
         }
 
@@ -46,7 +46,7 @@ export function getRecommendedMeals(user: UserProfile, foods: FoodItem[]): MealR
                     status = isCKD ? status : 'CAUTION'; // If CKD already set DANGER, keep it.
                     if (!isCKD && food.sugar > 20) status = 'DANGER'; // High sugar is danger for DM
                 }
-                reasons.push('High Sugar');
+                reasons.push('HIGH_SUGAR');
             }
 
             // GI Index
@@ -54,9 +54,7 @@ export function getRecommendedMeals(user: UserProfile, foods: FoodItem[]): MealR
                 if (status !== 'DANGER') {
                     status = (status === 'SAFE') ? 'CAUTION' : status;
                 }
-                reasons.push('High GI (Blood Sugar Spike Risk)');
-            } else if (food.giIndex === 'Low' && status === 'SAFE') {
-                // Positive reinforcement could be handled elsewhere, but for now we just don't flag.
+                reasons.push('HIGH_GI');
             }
         }
 
@@ -68,7 +66,7 @@ export function getRecommendedMeals(user: UserProfile, foods: FoodItem[]): MealR
                     // If CKD/DM didn't mark danger, HTN marks danger for very high sodium
                     status = (food.sodium > 1200) ? 'DANGER' : 'CAUTION';
                 }
-                reasons.push('High Sodium (BP Risk)');
+                reasons.push('HIGH_SODIUM_BP');
             }
         }
 
@@ -77,16 +75,16 @@ export function getRecommendedMeals(user: UserProfile, foods: FoodItem[]): MealR
             // Calorie Check (> 700kcal is heavy for one meal)
             if (food.calories > 700) {
                 status = (status === 'SAFE') ? 'CAUTION' : status;
-                reasons.push('High Calories');
+                reasons.push('HIGH_CALORIES');
             }
             // Fat Check (> 25g)
             if (food.fat > 25) {
                 if (status !== 'DANGER') status = 'CAUTION';
-                reasons.push('High Fat (Weight Management)');
+                reasons.push('HIGH_FAT');
             }
             // Sugar Check (Strict)
             if (food.sugar > 15) {
-                reasons.push('High Sugar');
+                reasons.push('HIGH_SUGAR');
                 if (status === 'SAFE') status = 'CAUTION';
             }
         }
@@ -95,14 +93,14 @@ export function getRecommendedMeals(user: UserProfile, foods: FoodItem[]): MealR
         if (user.diseases.includes('COLORECTAL')) {
             // "Westernized Diet" (High Fat) is a risk factor
             if (food.fat > 20) {
-                reasons.push('High Fat (Colorectal Risk)');
+                reasons.push('HIGH_FAT_COLORECTAL');
                 if (status === 'SAFE') status = 'CAUTION';
             }
             // Ideally prioritize Fiber, but we lack data. 
             // We flag processed/heavy items (High Sodium + High Fat often correlates)
             if (food.sodium > 1000 && food.fat > 20) {
                 status = 'CAUTION';
-                reasons.push('Processed/Heavy Meal (Limit for Gut Health)');
+                reasons.push('PROCESSED');
             }
         }
 
@@ -110,7 +108,7 @@ export function getRecommendedMeals(user: UserProfile, foods: FoodItem[]): MealR
         if (user.diseases.length === 0) {
             if (food.sodium > 1500) {
                 status = 'CAUTION';
-                reasons.push('Very High Sodium');
+                reasons.push('VERY_HIGH_SODIUM');
             }
         }
 
