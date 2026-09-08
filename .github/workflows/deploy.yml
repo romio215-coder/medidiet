@@ -17,25 +17,28 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # Public endpoint only. The MFDS API key stays in Supabase Edge Function secrets.
+      NEXT_PUBLIC_MFDS_PROXY_URL: https://rcciivtbucjtrhzgeyds.supabase.co/functions/v1/mfds-search
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "npm"
-          
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
-        
+
       - name: Install dependencies
-        run: npm install
-        
+        run: npm ci
+
       - name: Build with Next.js
         run: npm run build
-        
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
