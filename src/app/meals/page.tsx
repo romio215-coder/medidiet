@@ -9,53 +9,59 @@ import { translations } from '@/data/locales';
 import { adaptMfdsItems } from '@/data/apiAdapter';
 import { BackButton } from '@/components/ui/BackButton';
 
+const MFDS_PROXY_URL = process.env.NEXT_PUBLIC_MFDS_PROXY_URL?.trim() ?? '';
+
 export default function MealRecommendations() {
   const { profile, language } = useUserStore();
   const t = translations[language].meals;
   const common = translations[language].common;
 
-  // Search State
   const [searchQuery, setSearchQuery] = useState('');
   const [apiResults, setApiResults] = useState<FoodItem[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch API on search (Note: This will not work on static GitHub Pages)
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchApi = async () => {
-      if (searchQuery.length < 2) {
+      const query = searchQuery.trim();
+      if (query.length < 2 || !MFDS_PROXY_URL) {
         setApiResults([]);
         return;
       }
+
       setLoading(true);
       try {
-        const key = '40b1066f060f492fadfd';
-        const url = `https://openapi.foodsafetykorea.go.kr/api/${key}/I2790/json/1/10/DESC_KOR=${encodeURIComponent(searchQuery)}`;
+        const url = new URL(MFDS_PROXY_URL);
+        url.searchParams.set('q', query);
 
-        console.log("Fetching MFDS API (Client-side):", searchQuery);
+        const res = await fetch(url.toString(), {
+          signal: controller.signal,
+          headers: { Accept: 'application/json' },
+        });
+        if (!res.ok) throw new Error(`MFDS proxy returned ${res.status}`);
 
-        const res = await fetch(url);
-        if (!res.ok) throw new Error("API not available or blocked by CORS");
-        const rawData = await res.json();
-
-        if (rawData.I2790 && rawData.I2790.row) {
-          const adapted = adaptMfdsItems(rawData.I2790.row);
-          setApiResults(adapted);
-        }
+        const payload = await res.json();
+        const rows = Array.isArray(payload?.items) ? payload.items : [];
+        setApiResults(adaptMfdsItems(rows));
       } catch (err) {
-        console.warn("Search API skipped (Static Mode or Error)", err);
+        if ((err as Error).name !== 'AbortError') {
+          console.warn('MFDS search unavailable; local food data will be used.', err);
+          setApiResults([]);
+        }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     };
 
-    // Debounce
-    const timeout = setTimeout(fetchApi, 500);
-    return () => clearTimeout(timeout);
+    const timeout = window.setTimeout(fetchApi, 500);
+    return () => {
+      window.clearTimeout(timeout);
+      controller.abort();
+    };
   }, [searchQuery]);
 
-  // Merge Local + API
   const allFoods = useMemo(() => {
-    // If searching, prioritize API results + partial local matches
     if (searchQuery) {
       const localMatches = (foodData as unknown as FoodItem[]).filter(f =>
         f.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -63,16 +69,13 @@ export default function MealRecommendations() {
       );
       return [...localMatches, ...apiResults];
     }
-    // Default: just local
     return foodData as unknown as FoodItem[];
   }, [searchQuery, apiResults]);
 
-  // Apply Algorithm
   const recommendations = useMemo(() => {
     return getRecommendedMeals(profile, allFoods);
   }, [profile, allFoods]);
 
-  // Simple Category Filter
   const [filter, setFilter] = useState<'ALL' | 'SAFE' | 'CAUTION'>('ALL');
 
   const displayedMeals = recommendations.filter(rec => {
@@ -84,11 +87,9 @@ export default function MealRecommendations() {
     <div className="flex flex-col h-full w-full items-center py-6 relative">
       <BackButton />
 
-      {/* Main Kawaii Card */}
       <div className="kawaii-card w-full min-h-[85vh] flex flex-col space-y-4 relative p-6">
         <h1 className="text-3xl font-black text-[#FF8A80] text-center mb-2">🥗 {t.title}</h1>
 
-        {/* Search */}
         <div className="relative">
           <input
             type="text"
@@ -100,7 +101,6 @@ export default function MealRecommendations() {
           <div className="absolute right-4 top-4 text-[#BDBDBD]">🍳</div>
         </div>
 
-        {/* Filter Tabs */}
         <div className="flex space-x-2">
           {['ALL', 'SAFE', 'CAUTION'].map((ft) => (
             <button
@@ -117,7 +117,6 @@ export default function MealRecommendations() {
           ))}
         </div>
 
-        {/* List */}
         <div className="flex-1 space-y-4 overflow-y-auto pb-4 custom-scrollbar px-1">
           {displayedMeals.map((item) => (
             <div key={item.food.id} className={`p-4 rounded-[1.5rem] flex flex-col space-y-2 border-2 transition-all hover:scale-[1.02] duration-200 shadow-sm
@@ -139,7 +138,6 @@ export default function MealRecommendations() {
                 </div>
               </div>
 
-              {/* Nutrition details */}
               <div className="text-sm font-bold text-[#795548] grid grid-cols-2 gap-x-4 gap-y-1 mt-1 bg-white/50 p-2 rounded-xl">
                 <span>{t.sodium}: {item.food.sodium}mg</span>
                 <span>{t.sugar}: {item.food.sugar}g</span>
@@ -151,11 +149,9 @@ export default function MealRecommendations() {
                 )}
               </div>
 
-              {/* Status Message */}
               {item.reasons.length > 0 && (
                 <p className="text-sm font-bold text-[#D32F2F] bg-[#FFCDD2] p-2 rounded-lg text-center">
                   ⚠️ {item.reasons.map(code => (
-                    // Only try to translate if it's a known code, otherwise show as is (fallback)
                     t.warningCodes && t.warningCodes[code as keyof typeof t.warningCodes]
                       ? t.warningCodes[code as keyof typeof t.warningCodes]
                       : code
