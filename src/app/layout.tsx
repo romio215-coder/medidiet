@@ -1,40 +1,24 @@
 import type { Metadata } from "next";
-import { Jua } from "next/font/google";
 import "./globals.css";
-
-const jua = Jua({
-  weight: "400", // Jua only has 400 weight
-  subsets: ["latin"],
-  variable: "--font-jua",
-});
-
+import { AppShell } from "@/components/AppShell";
 export const metadata: Metadata = {
-  title: "MediDiet - Senior Nutrition",
-  description: "Personalized nutrition for seniors with chronic diseases",
+  title: {
+    default: "메디다이어트 | 식사 기록과 영양 정보",
+    template: "%s | MediDiet",
+  },
+  description:
+    "먹은 음식을 기록하고 제공량과 영양 정보를 확인하는 개인 식단 노트.",
+  robots: {index:false,follow:false},
 };
-
-import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
-import { HomeButton } from "@/components/ui/HomeButton";
-import { DisclaimerFooter } from "@/components/ui/DisclaimerFooter";
-
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
-      <body
-        className={`${jua.className} antialiased text-lg text-[#3E2723]`}
-      >
-        <main className="min-h-screen flex flex-col items-center justify-start max-w-lg mx-auto p-4">
-          <div className="w-full relative">
-            <HomeButton />
-            <LanguageSwitcher />
-            {children}
-            <DisclaimerFooter />
-          </div>
-        </main>
+    <html lang="ko">
+      <body>
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );

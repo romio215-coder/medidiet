@@ -1,51 +1,56 @@
-import { FoodItem } from '@/types';
-
-// MFDS API Response Type (Partial)
-interface MfdsFoodItem {
-    DESC_KOR: string; // 음식이름
-    SERVING_SIZE: string; // 1회제공량
-    NUTR_CONT1: string; // 열량(kcal)
-    NUTR_CONT2: string; // 탄수화물(g)
-    NUTR_CONT3: string; // 단백질(g)
-    NUTR_CONT4: string; // 지방(g)
-    NUTR_CONT5: string; // 당류(g)
-    NUTR_CONT6: string; // 나트륨(mg)
-    // NUTR_CONT7: Cholesterol
-    // NUTR_CONT8: Saturated Fat
-    // NUTR_CONT9: Trans Fat
-    // NUTR_CONT10: ?
-    // I2790 doesn't always provide Potassium directly in NUTR_CONT cols?
-    // Let's check docs safely. Usually Potassium is not guaranteed in standard I2790 fields unless expanded.
-    // For safety, we will parse what is available.
+import { FoodItem } from "../types/index";
+export function parseNutrient(value: unknown): number | null {
+  if (typeof value !== "string" && typeof value !== "number") return null;
+  const text = String(value).trim();
+  if (!/^\d+(?:\.\d+)?$/.test(text)) return null;
+  const number = Number(text);
+  return Number.isFinite(number) && number >= 0 && number <= 100000
+    ? number
+    : null;
 }
-
-export function adaptMfdsItems(rows: MfdsFoodItem[]): FoodItem[] {
-    return rows.map((row, _index) => {
-        // Parse helper
-        const p = (val: string) => {
-            const num = parseFloat(val);
-            return isNaN(num) ? 0 : num;
-        };
-
-        return {
-            id: `api-\${index}-\${Date.now()}`,
-            name: row.DESC_KOR, // English fallback could be same or google translated? For now use Korean name for both
-            nameKo: row.DESC_KOR,
-            calories: p(row.NUTR_CONT1),
-            carbs: p(row.NUTR_CONT2),
-            protein: p(row.NUTR_CONT3),
-            fat: p(row.NUTR_CONT4),
-            sugar: p(row.NUTR_CONT5),
-            sodium: p(row.NUTR_CONT6),
-
-            // Potassium (K) might not be in I2790 standard return or named differently.
-            // If missing, we default to 0 but should warn user or try to find it.
-            // Often NUTR_CONT_K is used if extended, checking basic fields 1-9 usually covers macros + Na.
-            potassium: 0, // Fallback as API might not provide it reliably in this service ID.
-
-            giIndex: 'Medium', // We don't have GI data from API, default to Medium
-            category: 'General',
-            categoryKo: '일반'
-        };
+export function adaptMfdsItems(rows: unknown[]): FoodItem[] {
+  const unique = new Map<string, FoodItem>();
+  for (const raw of rows) {
+    if (!raw || typeof raw !== "object") continue;
+    const row = raw as Record<string, unknown>;
+    if (typeof row.DESC_KOR !== "string" || !row.DESC_KOR.trim()) continue;
+    const name = row.DESC_KOR.trim().slice(0, 160);
+    const serving =
+      typeof row.SERVING_SIZE === "string" ? row.SERVING_SIZE.trim() : "";
+    const unit =
+      typeof row.SERVING_UNIT === "string"
+        ? row.SERVING_UNIT.trim().slice(0, 20)
+        : "";
+    const id =
+      "mfds-" +
+      JSON.stringify([
+        String(row.FOOD_CD ?? "").slice(0, 100),
+        name,
+        serving.slice(0, 30),
+        unit,
+        ...Array.from({ length: 6 }, (_, i) =>
+          parseNutrient(row[`NUTR_CONT${i + 1}`]),
+        ),
+      ]);
+    unique.set(id, {
+      id,
+      name,
+      nameKo: name,
+      category: "Food database",
+      categoryKo: "식품 DB",
+      source: "mfds",
+      // I2790 describes SERVING_SIZE as total contents, not a verified nutrition basis.
+      // Do not assume grams or use it as a serving multiplier for the diary.
+      serving: undefined,
+      calories: parseNutrient(row.NUTR_CONT1),
+      carbs: parseNutrient(row.NUTR_CONT2),
+      protein: parseNutrient(row.NUTR_CONT3),
+      fat: parseNutrient(row.NUTR_CONT4),
+      sugar: parseNutrient(row.NUTR_CONT5),
+      sodium: parseNutrient(row.NUTR_CONT6),
+      potassium: null,
+      giIndex: null,
     });
+  }
+  return [...unique.values()];
 }

@@ -17,25 +17,34 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # Review deployment uses public Open Food Facts. No secret required.
+      # Keep the unavailable legacy MFDS endpoint disabled.
+      NEXT_PUBLIC_MFDS_PROXY_URL: ""
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: "npm"
-          
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
-        
+
       - name: Install dependencies
-        run: npm install
-        
+        run: npm ci
+
+      - name: Validate source and data handling
+        run: |
+          npm run lint
+          npm test
+
       - name: Build with Next.js
         run: npm run build
-        
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

@@ -1,134 +1,293 @@
 "use client";
-
-import { useUserStore } from '@/store/userStore';
-import { LargeButton } from '@/components/ui/LargeButton';
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { translations } from '@/data/locales';
-import { BackButton } from '@/components/ui/BackButton';
-import { HealthReportWidget } from '@/components/ui/HealthReportWidget';
-
+import Link from "next/link";
+import { useState } from "react";
+import { Plus, Download, Utensils } from "lucide-react";
+import { useUserStore } from "@/store/userStore";
+import { calculateTotals, localDate } from "@/lib/nutritionAlgorithm";
+import { nutrients, slots, formatValue, conditions } from "@/data/copy";
+import { nutrientKeys } from "@/types";
 export default function Dashboard() {
-    const { profile, isConfigured, language } = useUserStore();
-    const router = useRouter();
-    const [mounted, setMounted] = useState(false);
-    const t = translations[language].dashboard;
-    // const common = translations[language].common;
-    const mealT = translations[language].meals;
-
-    useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setMounted(true);
-    }, []);
-
-    useEffect(() => {
-        if (!isConfigured) {
-            router.push('/onboarding');
-        }
-    }, [isConfigured, router]);
-
-    if (!mounted || !isConfigured) return null;
-
+  const { profile, entries, isConfigured, language, removeEntry, remember } =
+    useUserStore();
+  const en = language === "EN";
+  const [date, setDate] = useState(localDate());
+  if (!isConfigured)
     return (
-        <div className="flex flex-col h-full w-full p-6 space-y-8 relative">
-            <BackButton />
-
-            <div className="flex flex-col h-full w-full items-center py-6 relative">
-
-                {/* Main Kawaii Card */}
-                <div className="kawaii-card w-full min-h-[85vh] flex flex-col space-y-6 relative p-6">
-                    {/* Header */}
-                    <div className="flex flex-col items-center border-b-4 border-[#FFEBEE] border-dashed pb-4">
-                        <h1 className="text-3xl font-black text-[#FF8A80] mb-2">{t.greeting} {profile.name}{t.sir}</h1>
-
-                        {/* Disease Tags */}
-                        <div className="flex flex-wrap gap-2 justify-center">
-                            {profile.diseases.length > 0 ? (
-                                profile.diseases.map(d => (
-                                    <span key={d} className="bg-[#E1F5FE] text-[#0277BD] border-2 border-[#81D4FA] px-3 py-1 rounded-full font-bold text-sm shadow-sm">
-                                        {d}
-                                    </span>
-                                ))
-                            ) : (
-                                <span className="bg-[#B9F6CA] text-[#1B5E20] border-2 border-[#69F0AE] px-4 py-1 rounded-full font-bold text-sm">
-                                    {t.healthy}
-                                </span>
-                            )}
-                        </div>
-
-                        {/* 2024 Health Insights */}
-                        <div className="w-full mt-4">
-                            <HealthReportWidget />
-                        </div>
-                    </div>
-
-                    {/* Health Gauges */}
-                    <div className="space-y-4">
-                        <div className="flex justify-between items-end">
-                            <h2 className="text-xl font-bold text-[#4E342E] flex items-center gap-2">
-                                📊 {t.goalsTitle}
-                            </h2>
-                            <span className="text-xs text-[#8D6E63] opacity-75">{t.exampleValue}</span>
-                        </div>
-
-                        <div className="space-y-5 bg-[#FFF9C4]/30 p-4 rounded-[2rem] border-2 border-[#FFF59D]">
-                            {/* Logic: HTN/CKD gets stricter sodium (1500mg) vs Normal (2000mg) */}
-                            <Gauge
-                                label={mealT.sodium}
-                                current={800}
-                                max={profile.diseases.includes('HTN') || profile.diseases.includes('CKD') ? 1500 : 2000}
-                                unit="mg"
-                                warning={profile.diseases.includes('HTN') || profile.diseases.includes('CKD')}
-                            />
-
-                            {/* Logic: DM/Obesity gets stricter sugar (25g) vs Normal (50g) */}
-                            <Gauge
-                                label={mealT.sugar}
-                                current={15}
-                                max={profile.diseases.includes('DM') || profile.diseases.includes('OBESITY') ? 25 : 50}
-                                unit="g"
-                                warning={profile.diseases.includes('DM') || profile.diseases.includes('OBESITY')}
-                            />
-
-                            {profile.diseases.includes('CKD') && (
-                                <Gauge label={mealT.potassium} current={1200} max={2000} unit="mg" warning />
-                            )}
-                        </div>
-                    </div>
-
-                    {/* CTA (Note style inside parchment) */}
-                    <div className="mt-auto bg-[#E1F5FE] p-5 rounded-[2rem] border-4 border-[#B3E5FC] text-center transform hover:scale-105 transition-all">
-                        <h2 className="text-xl font-bold mb-2 text-[#0277BD]">🥗 {t.recommendedTitle}</h2>
-                        <p className="mb-4 text-[#5D4037] text-sm">{t.recommendedDesc}</p>
-                        <Link href="/meals">
-                            <LargeButton variant="primary" className="shadow-md">
-                                {t.viewPlan}
-                            </LargeButton>
-                        </Link>
-                    </div>
-                </div>
-            </div>
-        </div>
+      <section className="panel empty">
+        <Utensils size={36} style={{ margin: "auto" }} />
+        <h1>{en ? "Start your food diary" : "식단 노트를 시작해보세요"}</h1>
+        <p>
+          {en
+            ? "Choose a nickname and storage preference first."
+            : "별명과 저장 방식을 정하면 기록을 시작할 수 있어요."}
+        </p>
+        <Link href="/onboarding" className="btn">
+          {en ? "Set up diary" : "설정 시작하기"}
+        </Link>
+      </section>
     );
-}
-
-function Gauge({ label, current, max, unit, warning }: { label: string, current: number, max: number, unit: string, warning?: boolean }) {
-    const percent = Math.min((current / max) * 100, 100);
-    const color = warning && percent > 80 ? 'bg-[#E07A5F]' : 'bg-[#6B8E23]';
-
-    return (
+  const records = entries.filter((e) => e.date === date),
+    totals = calculateTotals(records);
+  function download() {
+    const body = JSON.stringify(
+      { exportedAt: new Date().toISOString(), profile, entries },
+      null,
+      2,
+    );
+    const url = URL.createObjectURL(
+      new Blob([body], { type: "application/json" }),
+    );
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `medidiet-${localDate()}.json`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  return (
+    <div className="stack">
+      <div className="heading">
         <div>
-            <div className="flex justify-between mb-2 text-base font-bold">
-                <span className={warning ? 'text-[#E07A5F]' : 'text-[#8D6E63]'}>{label}</span>
-                <span className="text-[#A1887F] text-sm">{current} / {max} {unit}</span>
-            </div>
-            <div className="w-full bg-[#D7CCC8] h-3 rounded-full overflow-hidden relative border border-[#BCAAA4]">
-                <div
-                    className={`h-full rounded-full transition-all duration-1000 ease-out ${color}`}
-                    style={{ width: `${percent}%` }}
-                />
-            </div>
+          <p className="eyebrow">MY FOOD DIARY</p>
+          <h1>
+            {en
+              ? `${profile.name}’s food diary`
+              : `${profile.name}님의 식사 기록`}
+          </h1>
+          <p>
+            {en
+              ? "What you recorded, without the guesswork."
+              : "먹은 만큼 기록하고, 하루의 균형을 살펴보세요."}
+          </p>
         </div>
-    );
+        <Link className="btn" href="/meals">
+          <Plus size={18} />
+          {en ? "Record a meal" : "식사 기록하기"}
+        </Link>
+      </div>
+      <div className="actions">
+        <label htmlFor="diary-date">{en ? "Date" : "날짜"}</label>
+        <input
+          className="date-field"
+          id="diary-date"
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          max={localDate()}
+        />
+        <span className="badge">
+          {en ? `${records.length} records` : `${records.length}개 기록`}
+        </span>
+      </div>
+      <div className="metrics">
+        {(["calories", "carbs", "protein", "sodium"] as const).map((k) => (
+          <div className="metric" key={k}>
+            <span>{nutrients[k][en ? 1 : 0]}</span>
+            <strong
+              className={
+                profile.limits?.[k] && totals[k].value > profile.limits[k]!
+                  ? "over"
+                  : ""
+              }
+            >
+              {records.length
+                ? formatValue(
+                    totals[k].missing === records.length
+                      ? null
+                      : totals[k].value,
+                    en,
+                  )
+                : "—"}{" "}
+              <small>{nutrients[k][2]}</small>
+            </strong>
+            <small>
+              {totals[k].missing
+                ? en
+                  ? `${totals[k].missing} missing; partial sum`
+                  : `${totals[k].missing}건 정보 없음 · 부분 합계`
+                : en
+                  ? "Recorded total"
+                  : "기록한 음식의 합계"}
+            </small>
+            {profile.limits?.[k] && (
+              <p>
+                <small>
+                  {en ? "Your daily upper limit" : "내 하루 상한"}{" "}
+                  {profile.limits[k]} {nutrients[k][2]}
+                </small>
+              </p>
+            )}
+          </div>
+        ))}
+      </div>
+      {nutrientKeys.some((k) => profile.limits?.[k]) && (
+        <section className="panel">
+          <h2>
+            {en ? "Daily upper limits you entered" : "내가 입력한 하루 상한"}
+          </h2>
+          <div className="stack" style={{ marginTop: 16, gap: 10 }}>
+            {nutrientKeys
+              .filter((k) => profile.limits?.[k])
+              .map((k) => (
+                <p key={k}>
+                  <strong>{nutrients[k][en ? 1 : 0]}</strong>
+                  {" · "}
+                  {profile.limits![k]} {nutrients[k][2]}
+                  {" · "}
+                  {totals[k].value > profile.limits![k]!
+                    ? en
+                      ? "Recorded total exceeds this limit"
+                      : "기록 합계가 상한을 넘었습니다"
+                    : totals[k].missing
+                      ? en
+                        ? "Incomplete data; total may be higher"
+                        : "누락 정보가 있어 실제 합계는 더 높을 수 있습니다"
+                      : records.length
+                        ? en
+                          ? "Recorded total is within this limit"
+                          : "기록 합계가 입력한 상한 이내입니다"
+                        : en
+                          ? "No records for this date"
+                          : "선택한 날의 기록 없음"}
+                </p>
+              ))}
+          </div>
+        </section>
+      )}
+      <section className="panel">
+        <div className="heading">
+          <h2>{en ? "Meals for this date" : "선택한 날의 식사"}</h2>
+          <button
+            className="btn secondary small"
+            onClick={download}
+            disabled={!entries.length}
+          >
+            <Download size={16} />
+            {en ? "Export all" : "전체 기록 내보내기"}
+          </button>
+        </div>
+        {!records.length ? (
+          <div className="empty">
+            <h3>
+              {en ? "No meals recorded yet" : "아직 기록한 식사가 없어요"}
+            </h3>
+            <p>
+              {en
+                ? "Add a food to see your actual recorded totals here."
+                : "음식을 추가하면 이곳에 실제 기록한 영양 합계가 표시됩니다."}
+            </p>
+            <Link className="btn secondary" href="/meals">
+              {en ? "Find or enter food" : "음식 찾거나 직접 입력"}
+            </Link>
+          </div>
+        ) : (
+          records.map((e) => (
+            <article className="record" key={e.id}>
+              <div>
+                <span className="badge">{slots[e.slot][en ? 1 : 0]}</span>
+                <h3>{en ? e.food.name : e.food.nameKo || e.food.name}</h3>
+                <p>
+                  {e.food.serving} × {e.portions} ·{" "}
+                  {formatValue(
+                    e.food.calories === null
+                      ? null
+                      : e.food.calories * e.portions,
+                    en,
+                  )}{" "}
+                  kcal
+                </p>
+                <p>
+                  {e.food.source === "manual"
+                    ? en
+                      ? "Entered from a label"
+                      : "영양표 직접 입력"
+                    : e.food.source === "openfoodfacts"
+                      ? "Open Food Facts · ODbL"
+                      : "MFDS"}
+                </p>
+              </div>
+              <button
+                className="btn secondary small"
+                aria-label={`${en ? "Delete" : "삭제"} ${e.food.name}`}
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      en
+                        ? "Remove this meal record?"
+                        : "이 식사 기록을 삭제할까요?",
+                    )
+                  )
+                    removeEntry(e.id);
+                }}
+              >
+                {en ? "Delete" : "삭제"}
+              </button>
+            </article>
+          ))
+        )}
+      </section>
+      <div className="grid-two">
+        <section className="panel">
+          <h2>{en ? "Other nutrients" : "나머지 영양소"}</h2>
+          <div className="nutrition" style={{ marginTop: 20 }}>
+            {nutrientKeys
+              .filter(
+                (k) => !["calories", "carbs", "protein", "sodium"].includes(k),
+              )
+              .map((k) => (
+                <div key={k}>
+                  <span>{nutrients[k][en ? 1 : 0]}</span>
+                  <span>
+                    {records.length
+                      ? formatValue(
+                          totals[k].missing === records.length
+                            ? null
+                            : totals[k].value,
+                          en,
+                        )
+                      : "—"}{" "}
+                    {nutrients[k][2]}
+                    {totals[k].missing ? " *" : ""}
+                  </span>
+                </div>
+              ))}
+          </div>
+          <p className="field-hint">
+            {en
+              ? "* Partial sum when a nutrient is unavailable. Total sugars are not the same as free or added sugars."
+              : "* 정보가 없는 음식은 합산하지 않은 부분 합계입니다. 총당류는 유리당·첨가당과 다릅니다."}
+          </p>
+        </section>
+        <section className="panel">
+          <h2>{en ? "Your preferences" : "나의 설정"}</h2>
+          <div className="actions" style={{ marginTop: 18 }}>
+            {profile.diseases.length ? (
+              profile.diseases.map((d) => (
+                <span className="badge" key={d}>
+                  {conditions[d][en ? 1 : 0]}
+                </span>
+              ))
+            ) : (
+              <p className="muted">
+                {en
+                  ? "No health interests selected"
+                  : "선택한 건강 관심사 없음"}
+              </p>
+            )}
+          </div>
+          <p className="field-hint">
+            {remember
+              ? en
+                ? "Kept in this browser."
+                : "이 브라우저에 보관 중입니다."
+              : en
+                ? "Stored for this browser session."
+                : "현재 브라우저 세션에 저장 중입니다."}
+          </p>
+          <Link className="btn secondary small" href="/onboarding">
+            {en ? "Edit settings" : "설정 변경"}
+          </Link>
+        </section>
+      </div>
+    </div>
+  );
 }
