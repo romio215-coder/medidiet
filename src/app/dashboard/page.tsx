@@ -119,23 +119,37 @@ export default function Dashboard() {
           </div>
         ))}
       </div>
-      {nutrientKeys.some(k => profile.limits?.[k]) && (
+      {nutrientKeys.some((k) => profile.limits?.[k]) && (
         <section className="panel">
-          <h2>{en ? "Daily upper limits you entered" : "내가 입력한 하루 상한"}</h2>
-          <div className="stack" style={{marginTop:16,gap:10}}>
-            {nutrientKeys.filter(k => profile.limits?.[k]).map(k => (
-              <p key={k}>
-                <strong>{nutrients[k][en ? 1 : 0]}</strong>{" · "}
-                {profile.limits![k]} {nutrients[k][2]}{" · "}
-                {totals[k].value > profile.limits![k]!
-                  ? (en ? "Recorded total exceeds this limit" : "기록 합계가 상한을 넘었습니다")
-                  : totals[k].missing
-                    ? (en ? "Incomplete data; total may be higher" : "누락 정보가 있어 실제 합계는 더 높을 수 있습니다")
-                    : records.length
-                      ? (en ? "Recorded total is within this limit" : "기록 합계가 입력한 상한 이내입니다")
-                      : (en ? "No records for this date" : "선택한 날의 기록 없음")}
-              </p>
-            ))}
+          <h2>
+            {en ? "Daily upper limits you entered" : "내가 입력한 하루 상한"}
+          </h2>
+          <div className="stack" style={{ marginTop: 16, gap: 10 }}>
+            {nutrientKeys
+              .filter((k) => profile.limits?.[k])
+              .map((k) => (
+                <p key={k}>
+                  <strong>{nutrients[k][en ? 1 : 0]}</strong>
+                  {" · "}
+                  {profile.limits![k]} {nutrients[k][2]}
+                  {" · "}
+                  {totals[k].value > profile.limits![k]!
+                    ? en
+                      ? "Recorded total exceeds this limit"
+                      : "기록 합계가 상한을 넘었습니다"
+                    : totals[k].missing
+                      ? en
+                        ? "Incomplete data; total may be higher"
+                        : "누락 정보가 있어 실제 합계는 더 높을 수 있습니다"
+                      : records.length
+                        ? en
+                          ? "Recorded total is within this limit"
+                          : "기록 합계가 입력한 상한 이내입니다"
+                        : en
+                          ? "No records for this date"
+                          : "선택한 날의 기록 없음"}
+                </p>
+              ))}
           </div>
         </section>
       )}
@@ -186,7 +200,9 @@ export default function Dashboard() {
                     ? en
                       ? "Entered from a label"
                       : "영양표 직접 입력"
-                    : "MFDS"}
+                    : e.food.source === "openfoodfacts"
+                      ? "Open Food Facts · ODbL"
+                      : "MFDS"}
                 </p>
               </div>
               <button

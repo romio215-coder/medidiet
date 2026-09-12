@@ -41,7 +41,12 @@ export function validFood(raw: unknown): raw is FoodItem {
     f.name.length > 0 &&
     f.name.length <= 160 &&
     typeof f.category === "string" &&
-    ["example", "mfds", "manual"].includes(f.source || "") &&
+    ["example", "mfds", "manual", "openfoodfacts"].includes(f.source || "") &&
+    (f.sourceUrl === undefined ||
+      (typeof f.sourceUrl === "string" &&
+        /^https:\/\/world\.openfoodfacts\.org\/product\/\d+$/.test(
+          f.sourceUrl,
+        ))) &&
     (f.nameKo === undefined ||
       (typeof f.nameKo === "string" && f.nameKo.length <= 160)) &&
     (f.categoryKo === undefined || typeof f.categoryKo === "string") &&

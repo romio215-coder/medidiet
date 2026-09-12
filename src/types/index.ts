@@ -32,7 +32,8 @@ export type FoodItem = Record<NutrientKey, number | null> & {
   category: string;
   categoryKo?: string;
   giIndex: "Low" | "Medium" | "High" | null;
-  source?: "example" | "mfds" | "manual";
+  source?: "example" | "mfds" | "manual" | "openfoodfacts";
+  sourceUrl?: string;
   serving?: string;
 };
 export interface MealRecommendation {

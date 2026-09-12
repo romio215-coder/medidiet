@@ -18,8 +18,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      # Public endpoint only. The MFDS API key stays in Supabase Edge Function secrets.
-      NEXT_PUBLIC_MFDS_PROXY_URL: ${{ vars.MFDS_PROXY_URL }}
+      # Review deployment uses public Open Food Facts. No secret required.
+      # Keep the unavailable legacy MFDS endpoint disabled.
+      NEXT_PUBLIC_MFDS_PROXY_URL: ""
     steps:
       - name: Checkout
         uses: actions/checkout@v4

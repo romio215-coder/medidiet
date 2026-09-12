@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   },
   description:
     "먹은 음식을 기록하고 제공량과 영양 정보를 확인하는 개인 식단 노트.",
+  robots: {index:false,follow:false},
 };
 export default function RootLayout({
   children,

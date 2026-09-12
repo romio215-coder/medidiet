@@ -18,8 +18,8 @@ export default function About() {
       <ul>
         <li>
           {en
-            ? "Food database: MFDS I2790 via a server proxy, when configured. Check the serving size and actual label. Missing values remain unavailable, never zero."
-            : "식품 DB: 연결된 경우 서버 프록시를 통해 식약처 I2790 데이터를 가져옵니다. 실제 제품과 제공량을 대조하세요. 누락 정보는 0이 아닌 정보 없음으로 표시합니다."}
+            ? "Food search uses Open Food Facts by default, a community-contributed packaged food database under ODbL. It is not verified medical data. Nutrients are shown per 100 g or 100 ml; compare with the actual label. MFDS is used only when separately configured. Missing values remain unavailable."
+            : "기본 식품 검색은 Open Food Facts의 이용자 참여형 포장 식품 데이터(ODbL)를 사용합니다. 검증된 의료 자료가 아닙니다. 100 g 또는 100 ml 기준이며 실제 영양표와 대조하세요. 식약처 연결은 별도 설정한 경우에만 사용합니다. 누락 정보는 정보 없음으로 표시합니다."}
         </li>
         <li>
           {en
@@ -32,6 +32,23 @@ export default function About() {
             : "합계에는 기록한 음식만 포함됩니다. 누락 영양소가 있으면 부분 합계입니다. 하루 상한은 사용자가 입력한 값이며 맞춤 처방이 아닙니다."}
         </li>
       </ul>
+      <p>
+        <a
+          href="https://world.openfoodfacts.org"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Open Food Facts
+        </a>
+        {" · "}
+        <a
+          href="https://opendatacommons.org/licenses/odbl/1-0/"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Open Database License (ODbL)
+        </a>
+      </p>
       <h2>{en ? "Storage and network requests" : "저장과 네트워크 요청"}</h2>
       <p>
         {en
@@ -40,8 +57,8 @@ export default function About() {
       </p>
       <p>
         {en
-          ? "Search terms are sent to the configured search proxy and MFDS. Health interests and your diary are not included. Hosting and search providers may process network metadata such as IP addresses. Avoid entering names, medical details, or identifiers in the search box."
-          : "검색어는 설정된 검색 프록시와 식약처에 전송됩니다. 건강 관심사와 식사 기록은 함께 보내지 않습니다. 호스팅·검색 제공자는 IP 주소 등 접속 정보를 처리할 수 있습니다. 검색창에는 이름, 진료 내용, 식별정보를 넣지 마세요."}
+          ? "Search terms are sent directly to Open Food Facts, or to MFDS through a proxy if separately configured. Health interests and your diary are not included. Hosting and search providers may process network metadata such as IP addresses. Avoid entering names, medical details, or identifiers in the search box."
+          : "검색어는 Open Food Facts로 직접 전송되며, 별도 설정 시 식약처 프록시로 전송됩니다. 건강 관심사와 식사 기록은 함께 보내지 않습니다. 호스팅·검색 제공자는 IP 주소 등 접속 정보를 처리할 수 있습니다. 검색창에는 이름, 진료 내용, 식별정보를 넣지 마세요."}
       </p>
       <p>
         {en

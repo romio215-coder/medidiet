@@ -4,11 +4,16 @@ import Link from "next/link";
 import { Search, Plus } from "lucide-react";
 import { useUserStore } from "@/store/userStore";
 import { parseNutrient } from "@/data/apiAdapter";
-import { searchFoods } from "@/lib/foodSearch";
+import {
+  searchFoods,
+  mfdsProxy,
+  foodProvider,
+  SearchError,
+} from "@/lib/foodSearch";
 import { getRecommendedMeals, localDate } from "@/lib/nutritionAlgorithm";
 import { FoodItem, MealSlot, nutrientKeys } from "@/types";
 import { nutrients, formatValue, slots } from "@/data/copy";
-const proxy = process.env.NEXT_PUBLIC_MFDS_PROXY_URL?.trim() || "";
+const proxy = mfdsProxy;
 export default function Meals() {
   const { language, profile, isConfigured, addEntry } = useUserStore(),
     en = language === "EN";
@@ -19,7 +24,7 @@ export default function Meals() {
     }),
     [loading, setLoading] = useState(false),
     [failed, setFailed] = useState(false),
-    [retry, setRetry] = useState(0);
+    [rateLimited, setRateLimited] = useState(false);
   const [selected, setSelected] = useState<FoodItem | null>(null),
     [notice, setNotice] = useState("");
   const [portion, setPortion] = useState("1"),
@@ -30,37 +35,40 @@ export default function Meals() {
     [manualError, setManualError] = useState("");
   const formRef = useRef<HTMLElement>(null);
   const q = query.trim();
-  useEffect(() => {
+  const requestRef = useRef<AbortController | null>(null);
+  const [verified, setVerified] = useState(false);
+  useEffect(() => () => requestRef.current?.abort(), []);
+  async function runSearch(e?: React.FormEvent) {
+    e?.preventDefault();
+    if (q.length < 2 || q.length > 60) return;
+    requestRef.current?.abort();
     const controller = new AbortController();
-    // Deferring state updates also avoids rendering stale results from a previous query.
-    const timer = setTimeout(async () => {
-      setFailed(false);
-      setLoading(false);
-      if (q.length < 2 || !proxy) return;
-      setLoading(true);
-      try {
-        const foods = await searchFoods(proxy, q, controller.signal);
-        if (!controller.signal.aborted) setRemote({ query: q, foods });
-      } catch {
-        if (!controller.signal.aborted) {
-          setFailed(true);
-          setRemote({ query: q, foods: [] });
-        }
-      } finally {
-        if (!controller.signal.aborted) setLoading(false);
+    requestRef.current = controller;
+    setFailed(false);
+    setRateLimited(false);
+    setLoading(true);
+    try {
+      const foods = await searchFoods(proxy, q, controller.signal);
+      if (!controller.signal.aborted) setRemote({ query: q, foods });
+    } catch (error) {
+      if (!controller.signal.aborted) {
+        setRateLimited(
+          error instanceof SearchError && error.code === "RATE_LIMIT",
+        );
+        setFailed(true);
+        setRemote({ query: q, foods: [] });
       }
-    }, 350);
-    return () => {
-      clearTimeout(timer);
-      controller.abort();
-    };
-  }, [q, retry]);
+    } finally {
+      if (!controller.signal.aborted) setLoading(false);
+    }
+  }
   const rows = getRecommendedMeals(
     profile,
     remote.query === q && q.length >= 2 ? remote.foods : [],
   );
   function choose(food: FoodItem) {
     setSelected(food);
+    setVerified(food.source === "manual");
     setPortion("1");
     setNotice("");
     setTimeout(
@@ -71,7 +79,7 @@ export default function Meals() {
   }
   function record(e: React.FormEvent) {
     e.preventDefault();
-    if (!selected) return;
+    if (!selected || !verified) return;
     const value = Number(portion);
     const result = addEntry({
       id: crypto.randomUUID(),
@@ -302,7 +310,24 @@ export default function Meals() {
               </label>
             </div>
             <div className="actions">
-              <button disabled={!isConfigured} className="btn" type="submit">
+              {selected.source !== "manual" && (
+                <label className="check">
+                  <input
+                    type="checkbox"
+                    required
+                    checked={verified}
+                    onChange={(e) => setVerified(e.target.checked)}
+                  />
+                  {en
+                    ? "I checked this product and its nutrition basis (100 g or 100 ml) against the label."
+                    : "실제 제품과 영양 기준량(100 g 또는 100 ml)을 영양표에서 확인했습니다."}
+                </label>
+              )}
+              <button
+                disabled={!isConfigured || !verified}
+                className="btn"
+                type="submit"
+              >
                 {en ? "Save meal" : "식사 저장"}
               </button>
               <button
@@ -330,37 +355,70 @@ export default function Meals() {
             ? "Food name · database search needs at least 2 characters"
             : "음식 이름 · 식품 DB 검색은 2글자 이상"}
         </label>
-        <div className="search-box">
-          <Search size={20} />
-          <input
-            id="food-query"
-            type="search"
-            maxLength={60}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={
-              en
-                ? "Try rice, milk, or a product name"
-                : "밥, 우유, 제품 이름을 검색해보세요"
-            }
-          />
-        </div>
-        {!proxy && (
-          <p className="notice">
+        <form className="actions" onSubmit={runSearch}>
+          <div className="search-box" style={{ flex: 1, minWidth: 180 }}>
+            <Search size={20} />
+            <input
+              id="food-query"
+              type="search"
+              maxLength={60}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={
+                en ? "Product name, e.g. milk" : "제품 이름, 예: 우유"
+              }
+            />
+          </div>
+          <button
+            className="btn"
+            type="submit"
+            disabled={loading || q.length < 2}
+          >
+            {en ? "Search" : "검색"}
+          </button>
+        </form>
+        <p className="field-hint">
+          {foodProvider === "openfoodfacts"
+            ? en
+              ? "Open Food Facts · community-contributed packaged food data. Compare with the actual label. Korean products may be missing."
+              : "Open Food Facts · 이용자 참여형 포장 식품 데이터입니다. 실제 제품 영양표와 대조하세요. 일부 한국 제품은 없을 수 있습니다."
+            : en
+              ? "MFDS food database"
+              : "식약처 식품 DB"}
+        </p>
+        {foodProvider === "openfoodfacts" && (
+          <p className="field-hint">
+            <a
+              href="https://world.openfoodfacts.org"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Open Food Facts
+            </a>
+            {" · "}
+            <a
+              href="https://opendatacommons.org/licenses/odbl/1-0/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              ODbL
+            </a>
+            {" · "}
             {en
-              ? "Live food search is not connected. You can still record a meal using its nutrition label."
-              : "실시간 식품 검색이 연결되지 않았습니다. 제품 영양표를 직접 입력하면 식사를 기록할 수 있습니다."}
+              ? "Search by pressing Enter or Search."
+              : "검색 버튼 또는 Enter로 검색합니다."}
           </p>
         )}
-        {failed && (
+        {failed && remote.query === q && (
           <div className="notice" role="alert">
-            {en
-              ? "The food database is unavailable. Retry or enter a nutrition label."
-              : "식품 DB에 연결하지 못했습니다. 다시 시도하거나 영양표를 직접 입력해주세요."}{" "}
-            <button
-              className="btn secondary small"
-              onClick={() => setRetry((v) => v + 1)}
-            >
+            {rateLimited
+              ? en
+                ? "Too many searches. Wait a minute and retry."
+                : "검색 요청이 많습니다. 잠시 후 다시 검색해주세요."
+              : en
+                ? "The food database is unavailable. Retry or enter a nutrition label."
+                : "식품 DB에 연결하지 못했습니다. 다시 시도하거나 영양표를 직접 입력해주세요."}{" "}
+            <button className="btn secondary small" onClick={() => runSearch()}>
               {en ? "Retry" : "다시 시도"}
             </button>
           </div>
@@ -387,7 +445,9 @@ export default function Meals() {
                     ? en
                       ? "Example · unverified"
                       : "화면 예시 · 미검증"
-                    : "MFDS"}
+                    : food.source === "openfoodfacts"
+                      ? "Open Food Facts"
+                      : "MFDS"}
                 </span>
                 {reasons.includes("MISSING_DATA") && (
                   <span className="badge warn">
@@ -404,6 +464,16 @@ export default function Meals() {
                       : "영양 기준량 미확인 · 제품 영양표 확인 필요")}
                 </p>
               </div>
+              {food.sourceUrl && (
+                <a
+                  className="field-hint"
+                  href={food.sourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {en ? "View source product" : "원본 제품 정보 보기"}
+                </a>
+              )}
               <div className="nutrition">
                 {nutrientKeys.map((k) => (
                   <div key={k}>
