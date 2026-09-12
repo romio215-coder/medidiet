@@ -49,6 +49,11 @@ serve(async (req) => {
     }
 
     const raw = await response.json();
+    const result = raw?.I2790?.RESULT ?? raw?.RESULT;
+    if (result?.CODE && !['INFO-000', 'INFO-200'].includes(result.CODE)) {
+      throw new Error('MFDS service rejected request');
+    }
+    if (!raw?.I2790 && result?.CODE !== 'INFO-200') throw new Error('Invalid upstream response');
     const items = Array.isArray(raw?.I2790?.row) ? raw.I2790.row : [];
 
     return new Response(JSON.stringify({ items }), {
@@ -59,8 +64,9 @@ serve(async (req) => {
         'Cache-Control': 'public, max-age=60',
       },
     });
-  } catch (error) {
-    console.error('MFDS proxy error', error);
+  } catch {
+    // Network exceptions can contain the upstream URL, which includes the secret.
+    console.error('MFDS upstream request failed');
     return new Response(JSON.stringify({ error: 'Upstream request failed', items: [] }), {
       status: 502,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
